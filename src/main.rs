@@ -1,30 +1,20 @@
-use beryllium::{
-    *, 
-    init::InitFlags, events::Event
-};
-
+use sdl2::event::Event as SdlEvent;
 fn main() {
-    let sdl = Sdl::init(InitFlags::EVERYTHING);
-    sdl.set_gl_context_major_version(3).expect("Failed Setting Major Version");
-    sdl.set_gl_context_minor_version(3).expect("Failed Setting Minor Version");
-    sdl.set_gl_profile(video::GlProfile::Core).expect("Failed Setting OpenGL to Core");
-
-    let window = sdl.create_gl_window(
-            video::CreateWinArgs { 
-                title: "Hello World", 
-                width: 400, 
-                height: 400, 
-                allow_high_dpi: true, 
-                borderless: false, 
-                resizable: false 
-            }             
-        ).expect("Failed to Create Window");
-
-    'event_loop: loop {
-        while let Some(event) = sdl.poll_events() {
+    let sdl = sdl2::init().expect("Failed to init SDL");    
+    let video_subsystem = sdl.video().expect("Failed to init video");
+    let window = video_subsystem.window(
+        "Tetris", 
+        800, 
+        400 
+        )
+        .build()
+        .expect("Failed to start window");
+    let mut event_pump = sdl.event_pump().expect("Failed to init event pump");
+    'run_loop: loop {
+        for event in event_pump.poll_iter() {
             match event {
-                (Event::Quit, _) => break 'event_loop,
-                (_, a) => println!("TimeStamp: {a}"),
+                SdlEvent::Quit {..} => break 'run_loop,
+                _ => {}
             }
         }
     }
