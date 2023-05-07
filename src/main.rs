@@ -1,4 +1,5 @@
 mod shader;
+mod program;
 use sdl2::{event::Event as SdlEvent, video::gl_attr};
 use std::ffi::{CStr, CString};
 use gl::types::GLuint;
@@ -12,7 +13,7 @@ fn main() {
     gl_attr.set_context_version(4,5);
 
     let window = video_subsystem
-        .window("Tetris", 800, 400)
+        .window("Tetris", 960, 590)
         .opengl()
         .build()
         .expect("Failed to start window");
@@ -22,9 +23,65 @@ fn main() {
         );
     
     unsafe { 
-        gl::Viewport(0, 0, 800, 400);
+        gl::Viewport(0, 0, 960, 590);
         gl::ClearColor(0.0, 0.5, 1.0, 1.0);
     }
+
+    let vert_shader = shader::Shader::from_vert_source(
+        &CString::new(include_str!("triangle.vert")).unwrap()
+        ).unwrap();
+
+    let frag_shader = shader::Shader::from_frag_source(
+        &CString::new(include_str!("triangle.frag")).unwrap()
+        ).unwrap();
+
+    let shader_program = program::Program::from_shaders(
+        &[vert_shader, frag_shader]
+        ).unwrap();
+    shader_program.set_used();
+
+    let vertices = vec![
+        -0.5, -0.5, 0.0,
+        0.5, -0.5, 0.0,
+        0.0, 0.5, 0.0
+    ];
+
+    //vertex buffer object
+    let mut vbo = 0;
+    unsafe {
+        gl::GenBuffers(1, &mut vbo);
+        gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
+        gl::BufferData(
+            gl::ARRAY_BUFFER,
+            (vertices.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
+            vertices.as_ptr() as *const gl::types::GLvoid,
+            gl::STATIC_DRAW
+            );
+        gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+    }
+
+    //vertex array object
+    let mut vao = 0;
+    unsafe {
+        gl::GenVertexArrays(1, &mut vao);
+        gl::BindVertexArray(vao);
+        gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
+
+        //layout in vertex shader
+        gl::EnableVertexAttribArray(0);
+        gl::VertexAttribPointer(
+            0,
+            3,
+            gl::FLOAT,
+            gl::FALSE,
+            (3 * std::mem::size_of::<f32>()) as gl::types::GLint,
+            std::ptr::null()
+            );
+
+        gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+        gl::BindVertexArray(0);
+    }
+
     let mut event_pump = sdl.event_pump().expect("Failed to init event pump");
     'run_loop: loop {
         for event in event_pump.poll_iter() {
@@ -34,8 +91,15 @@ fn main() {
             }
         }
 
+        shader_program.set_used();
         unsafe {
             gl::Clear(gl::COLOR_BUFFER_BIT);
+            gl::BindVertexArray(vao);
+            gl::DrawArrays(
+                gl::TRIANGLES,  //mode
+                0,  //start index of array
+                3   //number of indexes
+                )
         }
         window.gl_swap_window();
     }

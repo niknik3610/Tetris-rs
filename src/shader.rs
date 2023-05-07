@@ -8,18 +8,18 @@ pub struct Shader {
     pub id: GLuint,
 }
 impl Shader {
-    fn from_source(
+    pub fn from_source(
         source: &CStr, 
         kind: GLuint
         ) -> Result<Shader, String> {
         let id = shader_from_string(source, kind)?;
         Ok(Shader{id})
     }
-    fn from_vert_source(source: &CStr) -> Result<Shader, String> {
+    pub fn from_vert_source(source: &CStr) -> Result<Shader, String> {
         let id = shader_from_string(source, gl::VERTEX_SHADER)?;
         return Ok(Shader{id});
     }
-    fn from_frag_source(source: &CStr) -> Result<Shader, String> {
+    pub fn from_frag_source(source: &CStr) -> Result<Shader, String> {
         let id = shader_from_string(source, gl::FRAGMENT_SHADER)?;
         return Ok(Shader{id});
     }
@@ -64,7 +64,7 @@ fn shader_from_string(
     return Ok(id);
 }
 
-fn create_empty_cstring(len: usize) -> CString {
+pub fn create_empty_cstring(len: usize) -> CString {
     let mut buffer: Vec<u8> = Vec::with_capacity(len+1);
     buffer.extend([b' '].iter().cycle().take(len));
     unsafe { CString::from_vec_unchecked(buffer) } 
