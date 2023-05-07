@@ -38,8 +38,12 @@ fn main() {
     let vertices: Vec<f32> = vec![
         // positions      // colors
         -0.5, -0.5, 0.0,    0.0, 1.0, 0.0, // bottom left
-        0.5, -0.5, 0.0,     1.0, 0.0, 0.0, // bottom right
-        0.0, 0.5, 0.0,      0.0, 0.0, 1.0, // top
+        0.5, -0.5, 0.0,     0.0, 1.0, 0.0, // bottom right
+        0.5, 0.5, 0.0,      0.0, 1.0, 0.0, // top
+         
+        -0.5, -0.5, 0.0,    0.0, 1.0, 0.0, // bottom left
+        -0.5, 0.5, 0.0,     0.0, 1.0, 0.0, // bottom right
+        0.5, 0.5, 0.0,      0.0, 1.0, 0.0, // top                                  
     ];
 
 
@@ -112,7 +116,7 @@ fn main() {
             gl::DrawArrays(
                 gl::TRIANGLES,  //mode
                 0,  //start index of array
-                3   //number of indexes
+                6   //number of indexes
                 );
         }
         window.gl_swap_window();
