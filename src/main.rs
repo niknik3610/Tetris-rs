@@ -35,12 +35,14 @@ fn main() {
         &[vert_shader, frag_shader]
         ).unwrap();
 
-
     let vertices: Vec<f32> = vec![
-        -0.5, -0.5, 0.0, 
-        0.5, -0.5, 0.0,
-        0.0, 0.5, 0.0
+        // positions      // colors
+        -0.5, -0.5, 0.0,    0.0, 1.0, 0.0, // bottom left
+        0.5, -0.5, 0.0,     1.0, 0.0, 0.0, // bottom right
+        0.0, 0.5, 0.0,      0.0, 0.0, 1.0, // top
     ];
+
+
     //vertex buffer object
     let mut vbo: GLuint = 0;
     unsafe {
@@ -62,17 +64,27 @@ fn main() {
         gl::BindVertexArray(vao);
         gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
 
-        //layout in vertex shader
-        gl::EnableVertexAttribArray(0);
         gl::VertexAttribPointer(
             0,
             3,
             gl::FLOAT,
             gl::FALSE,
-            (3 * std::mem::size_of::<f32>()) as gl::types::GLint,
-            std::ptr::null()
+            (6 * std::mem::size_of::<f32>()) as gl::types::GLint,
+            std::ptr::null() // offset of the first component
             );
+        //layout in vertex shader
+        gl::EnableVertexAttribArray(0);
 
+        gl::VertexAttribPointer(
+            1,
+            3,
+            gl::FLOAT,
+            gl::FALSE,
+            (6 * std::mem::size_of::<f32>()) as gl::types::GLint,
+            (3 * std::mem::size_of::<f32>()) as *const gl::types::GLvoid
+            );
+        gl::EnableVertexAttribArray(1);
+        
         gl::BindBuffer(gl::ARRAY_BUFFER, 0);
         gl::BindVertexArray(0);
     }
