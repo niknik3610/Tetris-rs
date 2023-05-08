@@ -3,6 +3,8 @@ use sdl2::EventPump;
 use sdl2::Sdl;
 use sdl2::video::GLContext;
 use sdl2::video::Window;
+use crate::QUAD_SIZE;
+use crate::RESOLUTION;
 use crate::program::Program;
 use crate::shader;
 use crate::program;
@@ -13,6 +15,59 @@ pub struct GLStructs {
     window: Window,
     _context: GLContext,
     pub event_pump: EventPump,
+}
+
+pub struct VideoBuffer {
+    pub vertices: Vec<f32>
+}
+impl VideoBuffer {
+    pub fn new() -> VideoBuffer {
+        return VideoBuffer { vertices: Vec::new() }
+    }
+    pub fn clear(&mut self) {
+        self.vertices = Vec::new();
+    }
+    pub fn add_quad(
+        &mut self,
+        coords: (f32, f32),
+        rgb: (u8, u8, u8)
+        ) {
+        let coords = VideoBuffer::normalize_coords(coords);
+        let size = VideoBuffer::normalize_size(QUAD_SIZE); 
+        let rgb = VideoBuffer::normalize_rgb(rgb);
+
+        println!("Coords: {:?}", coords);
+        println!("Size: {:?}", size);
+        println!("RGB: {:?}", rgb);
+        self.vertices.extend([
+            coords.0, coords.1, 0.0,    rgb.0, rgb.1, rgb.2, // bottom left
+            coords.0 + size.0, coords.1, 0.0,     rgb.0, rgb.1, rgb.2, // bottom right
+            coords.0, coords.1 + size.1, 0.0,      rgb.0, rgb.1, rgb.2, // top left
+         
+            coords.0 + size.0, coords.1 + size.1, 0.0,    rgb.0, rgb.1, rgb.2, //top right
+            coords.0, coords.1 + size.1, 0.0,      rgb.0, rgb.1, rgb.2, // top left 
+            coords.0 + size.0, coords.1, 0.0,     rgb.0, rgb.1, rgb.2, // bottom right
+        ]);
+    }
+    fn normalize_coords(coords: (f32, f32)) -> (f32, f32) {
+        return (
+            ((coords.0 / RESOLUTION.0 as f32) - 0.5),
+            ((coords.1 / RESOLUTION.1 as f32) - 0.5)
+        );        
+    }
+    fn normalize_size(size: (f32, f32)) -> (f32, f32) {
+        return (
+            (size.0*10.0 / RESOLUTION.0 as f32),
+            (size.1*10.0 / RESOLUTION.1 as f32)
+        );        
+    }
+    fn normalize_rgb(rgb: (u8, u8, u8)) -> (f32, f32, f32) {
+        return (
+            rgb.0 as f32 / 256.0, 
+            rgb.1 as f32 / 256.0,
+            rgb.2 as f32 / 256.0
+            )
+    }
 }
 
 pub fn init_sdl() -> Result<GLStructs, String> {
@@ -62,19 +117,7 @@ pub fn init_sdl() -> Result<GLStructs, String> {
     return Ok(to_return);
 }
 
-pub fn set_video_buffers() -> Result<u32, ()> {
-    let vertices: Vec<f32> = vec![
-        // positions      // colors
-        -0.5, -0.5, 0.0,    0.0, 1.0, 0.0, // bottom left
-        0.5, -0.5, 0.0,     0.0, 1.0, 0.0, // bottom right
-        0.5, 0.5, 0.0,      0.0, 1.0, 0.0, // top
-         
-        -0.5, -0.5, 0.0,    0.0, 1.0, 0.0, // bottom left
-        -0.5, 0.5, 0.0,     0.0, 1.0, 0.0, // bottom right
-        0.5, 0.5, 0.0,      0.0, 1.0, 0.0, // top                                  
-    ];
-
-
+pub fn bind_video_buffer(video_buffer: VideoBuffer) -> Result<u32, ()> {
     //vertex buffer object
     let mut vbo = 0;
     unsafe {
@@ -82,8 +125,8 @@ pub fn set_video_buffers() -> Result<u32, ()> {
         gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
         gl::BufferData(
             gl::ARRAY_BUFFER,
-            (vertices.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
-            vertices.as_ptr() as *const gl::types::GLvoid,
+            (video_buffer.vertices.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
+            video_buffer.vertices.as_ptr() as *const gl::types::GLvoid,
             gl::STATIC_DRAW
             );
         gl::BindBuffer(gl::ARRAY_BUFFER, 0);
