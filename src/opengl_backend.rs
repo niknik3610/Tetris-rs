@@ -123,8 +123,13 @@ pub fn init_sdl() -> Result<GLStructs, String> {
         &[vert_shader, frag_shader]
         ).unwrap();
     unsafe { 
-        gl::Viewport(0, 0, 900, 700);
-        gl::ClearColor(0.3, 0.3, 0.5, 1.0);    
+        gl::Viewport(
+            0,
+            0,
+            (RESOLUTION.0 * 2).try_into().unwrap(),
+            (RESOLUTION.1 * 2).try_into().unwrap()
+            );
+        gl::ClearColor(0.0, 0.0, 0.0, 1.0);    
     }
     let event_pump = sdl.event_pump().expect("Failed to init event pump");
 
