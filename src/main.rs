@@ -1,10 +1,13 @@
 mod shader;
 mod program;
 mod opengl_backend;
-use std::ffi::{CStr, CString};
+mod pieces;
+
+use std::{ffi::{CStr, CString}, time::Duration};
 use gl::types::GLuint;
 use opengl_backend::VideoBuffer;
 use sdl2::event::Event as SdlEvent;
+use std::thread::sleep;
 
 pub const RESOLUTION: (u32, u32) = (800, 800);
 pub const GRID_SIZE: (u32, u32) = (RESOLUTION.0/10, RESOLUTION.1/10);
@@ -24,11 +27,27 @@ fn main() {
     let mut gl_context = opengl_backend::init_sdl().unwrap();
     let mut video_buffer = VideoBuffer::new();
     draw_board(&mut video_buffer);
+    println!("{}", GRID_START[0]);
     
     let bglen = video_buffer.bg_verts.len() / 6;
-    'run_loop: loop {
+    let mut curr_piece = pieces::PIECES[0];
+
+    'run_loop: loop { 
+        video_buffer.clear_fg();
+
+        curr_piece.blocks.iter().for_each(|block|{
+            video_buffer.add_quad_fg(
+                (
+                    curr_piece.coordinates.0 + block.0,
+                    curr_piece.coordinates.1 + block.1
+                ),   
+                curr_piece.color
+                );
+            println!("x: {}", curr_piece.coordinates.0 + block.0);
+        });
+        curr_piece.mv(pieces::Move::DOWN);
+
         let vao_id = opengl_backend::bind_video_buffer(&video_buffer).unwrap();
-        
         for event in gl_context.event_pump.poll_iter() {
             match event {
                 SdlEvent::Quit {..} => break 'run_loop,
@@ -39,8 +58,9 @@ fn main() {
         opengl_backend::render_buffer(
             &mut gl_context,
             vao_id,
-            ((bglen + video_buffer.fg_verts.len()) / 6).try_into().unwrap()
+            ((bglen + (video_buffer.fg_verts.len() / 6))).try_into().unwrap()
             ).unwrap();
+        sleep(Duration::from_millis(500)) 
     }
 }
 
