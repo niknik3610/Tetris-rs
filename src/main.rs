@@ -7,7 +7,6 @@ use opengl_backend::VideoBuffer;
 use sdl2::event::Event as SdlEvent;
 
 pub const RESOLUTION: (u32, u32) = (800, 800);
-
 pub const GRID_SIZE: (u32, u32) = (80, 80);
 pub const SIZE_MULTIPLIER: u32 = 4;
 pub const QUAD_SIZE: f32 = (RESOLUTION.0 / GRID_SIZE.0 * SIZE_MULTIPLIER) as f32;
