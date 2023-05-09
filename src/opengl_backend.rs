@@ -36,36 +36,36 @@ impl VideoBuffer {
         let size = VideoBuffer::normalize_size(QUAD_SIZE); 
         let rgb = VideoBuffer::normalize_rgb(rgb);
 
-        println!("Coords: {:?}", coords);
-        println!("Size: {:?}", size);
-        println!("RGB: {:?}", rgb);
+        // println!("Coords: {:?}", coords);
+        // println!("Size: {:?}", size);
+        // println!("RGB: {:?}", rgb);
         self.vertices.extend([
-            coords.0, coords.1, 0.0,    rgb.0, rgb.1, rgb.2, // bottom left
-            coords.0 + size.0, coords.1, 0.0,     rgb.0, rgb.1, rgb.2, // bottom right
-            coords.0, coords.1 + size.1, 0.0,      rgb.0, rgb.1, rgb.2, // top left
+            coords.0, coords.1, 0.0,                rgb.0, rgb.1, rgb.2, // bottom left
+            coords.0 + size.0, coords.1, 0.0,       rgb.0, rgb.1, rgb.2, // bottom right
+            coords.0, coords.1 + size.1, 0.0,       rgb.0, rgb.1, rgb.2, // top left
          
-            coords.0 + size.0, coords.1 + size.1, 0.0,    rgb.0, rgb.1, rgb.2, //top right
-            coords.0, coords.1 + size.1, 0.0,      rgb.0, rgb.1, rgb.2, // top left 
-            coords.0 + size.0, coords.1, 0.0,     rgb.0, rgb.1, rgb.2, // bottom right
+            coords.0 + size.0, coords.1 + size.1, 0.0,      rgb.0, rgb.1, rgb.2, //top right
+            coords.0, coords.1 + size.1, 0.0,               rgb.0, rgb.1, rgb.2, // top left 
+            coords.0 + size.0, coords.1, 0.0,               rgb.0, rgb.1, rgb.2, // bottom right
         ]);
     }
     fn normalize_coords(coords: (f32, f32)) -> (f32, f32) {
         return (
-            ((coords.0 / RESOLUTION.0 as f32) - 0.5),
-            ((coords.1 / RESOLUTION.1 as f32) - 0.5)
+            ((coords.0 / RESOLUTION.0 as f32) - 1.0),
+            ((coords.1 / RESOLUTION.1 as f32) - 1.0)
         );        
     }
     fn normalize_size(size: (f32, f32)) -> (f32, f32) {
         return (
-            (size.0*10.0 / RESOLUTION.0 as f32),
-            (size.1*10.0 / RESOLUTION.1 as f32)
+            (size.0 / RESOLUTION.0 as f32),
+            (size.1 / RESOLUTION.1 as f32)
         );        
     }
     fn normalize_rgb(rgb: (u8, u8, u8)) -> (f32, f32, f32) {
         return (
-            rgb.0 as f32 / 256.0, 
-            rgb.1 as f32 / 256.0,
-            rgb.2 as f32 / 256.0
+            rgb.0 as f32 / 255.0, 
+            rgb.1 as f32 / 255.0,
+            rgb.2 as f32 / 255.0
             )
     }
 }
@@ -88,7 +88,6 @@ pub fn init_sdl() -> Result<GLStructs, String> {
     let _gl = gl::load_with (|f|
         video_subsystem.gl_get_proc_address(f) as *const std::os::raw::c_void
         ); 
-
     let vert_shader = shader::Shader::from_vert_source(
         &CString::new(include_str!("triangle.vert")).unwrap()
         ).unwrap();
@@ -117,7 +116,7 @@ pub fn init_sdl() -> Result<GLStructs, String> {
     return Ok(to_return);
 }
 
-pub fn bind_video_buffer(video_buffer: VideoBuffer) -> Result<u32, ()> {
+pub fn bind_video_buffer(video_buffer: &VideoBuffer) -> Result<u32, ()> {
     //vertex buffer object
     let mut vbo = 0;
     unsafe {
@@ -166,22 +165,27 @@ pub fn bind_video_buffer(video_buffer: VideoBuffer) -> Result<u32, ()> {
     return Ok(vao)
 }
 
-pub fn render_buffer(gl_context: &mut GLStructs, vertex_array: u32) -> Result<(), String> { 
-        unsafe {
-            gl::Clear(gl::COLOR_BUFFER_BIT);
-        }
+pub fn render_buffer(
+    gl_context: &mut GLStructs,
+    vertex_array: u32,
+    amount_of_quads: i32
+    ) -> Result<(), String> { 
+    let amount_of_quads = amount_of_quads * 6;
+    unsafe {
+        gl::Clear(gl::COLOR_BUFFER_BIT);
+    }
 
-        gl_context.shader_program.set_used();
-        unsafe {
-            gl::BindVertexArray(vertex_array);
-            gl::DrawArrays(
-                gl::TRIANGLES,  //mode
-                0,  //start index of array
-                6   //number of indexes
-                );
-        }
-        gl_context.window.gl_swap_window();
-    
+    gl_context.shader_program.set_used();
+    unsafe {
+        gl::BindVertexArray(vertex_array);
+        gl::DrawArrays(
+            gl::TRIANGLES,  //mode
+            0,  //start index of array
+            amount_of_quads   //number of indexes
+            );
+    }
+    gl_context.window.gl_swap_window();
+
     return Ok(());
 }
 
