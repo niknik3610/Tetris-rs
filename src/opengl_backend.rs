@@ -18,36 +18,62 @@ pub struct GLStructs {
 }
 
 pub struct VideoBuffer {
-    pub vertices: Vec<f32>
+    pub bg_verts: Vec<f32>,
+    pub fg_verts: Vec<f32>
 }
 impl VideoBuffer {
     pub fn new() -> VideoBuffer {
-        return VideoBuffer { vertices: Vec::new() }
-    }
-    pub fn clear(&mut self) {
-        self.vertices = Vec::new();
-    }
-    pub fn add_quad(
+        return VideoBuffer { bg_verts: Vec:: new(), fg_verts: Vec::new() }
+    } 
+    pub fn add_quad_fg(
         &mut self,
         coords: (f32, f32),
         rgb: (u8, u8, u8)
         ) {
         let coords = VideoBuffer::normalize_coords(coords);
-        let size = VideoBuffer::normalize_size(QUAD_SIZE); 
         let rgb = VideoBuffer::normalize_rgb(rgb);
-
+        let size = VideoBuffer::normalize_size(QUAD_SIZE);
         // println!("Coords: {:?}", coords);
         // println!("Size: {:?}", size);
         // println!("RGB: {:?}", rgb);
-        self.vertices.extend([
-            coords.0, coords.1, 0.0,                rgb.0, rgb.1, rgb.2, // bottom left
-            coords.0 + size.0, coords.1, 0.0,       rgb.0, rgb.1, rgb.2, // bottom right
-            coords.0, coords.1 + size.1, 0.0,       rgb.0, rgb.1, rgb.2, // top left
+        self.fg_verts.extend([
+            coords.0, coords.1, 0.0,            rgb.0, rgb.1, rgb.2, // bottom left
+            coords.0 + size, coords.1, 0.0,     rgb.0, rgb.1, rgb.2, // bottom right
+            coords.0, coords.1 + size, 0.0,     rgb.0, rgb.1, rgb.2, // top left
          
-            coords.0 + size.0, coords.1 + size.1, 0.0,      rgb.0, rgb.1, rgb.2, //top right
-            coords.0, coords.1 + size.1, 0.0,               rgb.0, rgb.1, rgb.2, // top left 
-            coords.0 + size.0, coords.1, 0.0,               rgb.0, rgb.1, rgb.2, // bottom right
-        ]);
+            coords.0 + size, coords.1 + size, 0.0,  rgb.0, rgb.1, rgb.2, //top right
+            coords.0, coords.1 + size, 0.0,         rgb.0, rgb.1, rgb.2, // top left 
+            coords.0 + size, coords.1, 0.0,         rgb.0, rgb.1, rgb.2, // bottom right
+        ])
+    }
+    pub fn add_quad_bg(
+        &mut self,
+        coords: (f32, f32),
+        rgb: (u8, u8, u8)
+        ) {        
+        let coords = VideoBuffer::normalize_coords(coords);
+        let rgb = VideoBuffer::normalize_rgb(rgb);
+        let size = VideoBuffer::normalize_size(QUAD_SIZE);
+        // println!("Coords: {:?}", coords);
+        // println!("Size: {:?}", size);
+        // println!("RGB: {:?}", rgb);
+        self.bg_verts.extend([
+            coords.0, coords.1, 0.0,            rgb.0, rgb.1, rgb.2, // bottom left
+            coords.0 + size, coords.1, 0.0,     rgb.0, rgb.1, rgb.2, // bottom right
+            coords.0, coords.1 + size, 0.0,     rgb.0, rgb.1, rgb.2, // top left
+         
+            coords.0 + size, coords.1 + size, 0.0,  rgb.0, rgb.1, rgb.2, //top right
+            coords.0, coords.1 + size, 0.0,         rgb.0, rgb.1, rgb.2, // top left 
+            coords.0 + size, coords.1, 0.0,         rgb.0, rgb.1, rgb.2, // bottom right
+        ])
+    }
+    ///Generally doesn't need to be used
+    pub fn clear_fg(&mut self) {
+        self.fg_verts = Vec::new();
+    }
+    ///Generally Doesn't need to be used
+    pub fn clear_bg(&mut self) {
+        self.fg_verts = Vec::new();
     }
     fn normalize_coords(coords: (f32, f32)) -> (f32, f32) {
         return (
@@ -55,11 +81,8 @@ impl VideoBuffer {
             ((coords.1 / RESOLUTION.1 as f32) - 1.0)
         );        
     }
-    fn normalize_size(size: (f32, f32)) -> (f32, f32) {
-        return (
-            (size.0 / RESOLUTION.0 as f32),
-            (size.1 / RESOLUTION.1 as f32)
-        );        
+    fn normalize_size(size: f32) -> f32 {
+        return size / RESOLUTION.0 as f32;        
     }
     fn normalize_rgb(rgb: (u8, u8, u8)) -> (f32, f32, f32) {
         return (
@@ -79,7 +102,7 @@ pub fn init_sdl() -> Result<GLStructs, String> {
     gl_attr.set_context_version(4, 5);
 
     let window = video_subsystem
-        .window("Tetris", 900, 700)
+        .window("Tetris", RESOLUTION.0, RESOLUTION.1)
         .opengl()
         .build()
         .expect("Failed to start window");
@@ -118,14 +141,19 @@ pub fn init_sdl() -> Result<GLStructs, String> {
 
 pub fn bind_video_buffer(video_buffer: &VideoBuffer) -> Result<u32, ()> {
     //vertex buffer object
+    let video_buffer = [
+        video_buffer.bg_verts.clone(),
+        video_buffer.fg_verts.clone(),
+    ].concat();
+        
     let mut vbo = 0;
     unsafe {
         gl::GenBuffers(1, &mut vbo);
         gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
         gl::BufferData(
             gl::ARRAY_BUFFER,
-            (video_buffer.vertices.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
-            video_buffer.vertices.as_ptr() as *const gl::types::GLvoid,
+            (video_buffer.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
+            video_buffer.as_ptr() as *const gl::types::GLvoid,
             gl::STATIC_DRAW
             );
         gl::BindBuffer(gl::ARRAY_BUFFER, 0);
