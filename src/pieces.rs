@@ -9,7 +9,8 @@ pub const PIECES: [Piece; 1] = [
         (3.0 * QUAD_SIZE, 0.0)
         ],
         ((GRID_START[0] as f32 + 3.0) * QUAD_SIZE, 20.0 * QUAD_SIZE),
-        (10, 220, 240))
+        (10, 220, 240)
+        )
 ];
 
 pub enum Move {

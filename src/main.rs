@@ -2,12 +2,16 @@ mod shader;
 mod program;
 mod opengl_backend;
 mod pieces;
+mod input_handler;
 
-use std::{ffi::{CStr, CString}, time::Duration};
+use std::{ffi::{CStr, CString}, time::{Duration, Instant}};
 use gl::types::GLuint;
 use opengl_backend::VideoBuffer;
 use sdl2::event::Event as SdlEvent;
 use std::thread::sleep;
+
+//TODO: Change this to change per level
+pub const TICK_RATE: Duration = Duration::from_millis(300);     
 
 pub const RESOLUTION: (u32, u32) = (800, 800);
 pub const GRID_SIZE: (u32, u32) = (RESOLUTION.0/10, RESOLUTION.1/10);
@@ -31,8 +35,14 @@ fn main() {
     
     let bglen = video_buffer.bg_verts.len() / 6;
     let mut curr_piece = pieces::PIECES[0];
-
+    
+    let mut last_tick = Instant::now();
     'run_loop: loop { 
+        if Instant::now().duration_since(last_tick) > TICK_RATE {
+            curr_piece.mv(pieces::Move::DOWN);
+            last_tick = Instant::now();
+        }
+
         video_buffer.clear_fg();
 
         curr_piece.blocks.iter().for_each(|block|{
@@ -43,14 +53,17 @@ fn main() {
                 ),   
                 curr_piece.color
                 );
-            println!("x: {}", curr_piece.coordinates.0 + block.0);
         });
-        curr_piece.mv(pieces::Move::DOWN);
 
         let vao_id = opengl_backend::bind_video_buffer(&video_buffer).unwrap();
         for event in gl_context.event_pump.poll_iter() {
             match event {
                 SdlEvent::Quit {..} => break 'run_loop,
+                SdlEvent::KeyDown { timestamp, window_id, keycode, ..} => {
+                    if let Some(action) = input_handler::handle_key_event(keycode) {
+                        curr_piece.mv(action);
+                    }
+                }
                 _ => {}
             }
         }
@@ -60,7 +73,6 @@ fn main() {
             vao_id,
             ((bglen + (video_buffer.fg_verts.len() / 6))).try_into().unwrap()
             ).unwrap();
-        sleep(Duration::from_millis(500)) 
     }
 }
 
