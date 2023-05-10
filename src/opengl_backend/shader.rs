@@ -1,27 +1,20 @@
-use crate::{
-    CStr,
-    GLuint,
-    CString
-};
+use crate::{CStr, CString, GLuint};
 
 pub struct Shader {
     pub id: GLuint,
 }
 impl Shader {
-    pub fn from_source(
-        source: &CStr, 
-        kind: GLuint
-        ) -> Result<Shader, String> {
+    pub fn from_source(source: &CStr, kind: GLuint) -> Result<Shader, String> {
         let id = shader_from_string(source, kind)?;
-        Ok(Shader{id})
+        Ok(Shader { id })
     }
     pub fn from_vert_source(source: &CStr) -> Result<Shader, String> {
         let id = shader_from_string(source, gl::VERTEX_SHADER)?;
-        return Ok(Shader{id});
+        return Ok(Shader { id });
     }
     pub fn from_frag_source(source: &CStr) -> Result<Shader, String> {
         let id = shader_from_string(source, gl::FRAGMENT_SHADER)?;
-        return Ok(Shader{id});
+        return Ok(Shader { id });
     }
 }
 impl Drop for Shader {
@@ -32,13 +25,10 @@ impl Drop for Shader {
     }
 }
 
-fn shader_from_string(
-    source: &CStr,
-    kind: GLuint
-    ) -> Result<GLuint, String> {
-    let id = unsafe {   gl::CreateShader(kind) };
+fn shader_from_string(source: &CStr, kind: GLuint) -> Result<GLuint, String> {
+    let id = unsafe { gl::CreateShader(kind) };
 
-    let mut success = 1; 
+    let mut success = 1;
     unsafe {
         gl::ShaderSource(id, 1, &source.as_ptr(), std::ptr::null());
         gl::CompileShader(id);
@@ -52,12 +42,12 @@ fn shader_from_string(
         }
         let buffer = create_empty_cstring(err_len as usize);
         unsafe {
-            gl::GetShaderInfoLog (
+            gl::GetShaderInfoLog(
                 id,
                 err_len + 1,
                 std::ptr::null_mut(),
-                buffer.as_ptr() as *mut gl::types::GLchar
-                );
+                buffer.as_ptr() as *mut gl::types::GLchar,
+            );
         }
         return Err(buffer.to_string_lossy().into_owned());
     }
@@ -65,7 +55,7 @@ fn shader_from_string(
 }
 
 pub fn create_empty_cstring(len: usize) -> CString {
-    let mut buffer: Vec<u8> = Vec::with_capacity(len+1);
+    let mut buffer: Vec<u8> = Vec::with_capacity(len + 1);
     buffer.extend([b' '].iter().cycle().take(len));
-    unsafe { CString::from_vec_unchecked(buffer) } 
+    unsafe { CString::from_vec_unchecked(buffer) }
 }
