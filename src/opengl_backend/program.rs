@@ -1,6 +1,6 @@
 use gl::types::GLuint;
 
-use crate::shader::{Shader, create_empty_cstring};
+use crate::opengl_backend::shader::{Shader, create_empty_cstring};
 
 pub struct Program {
     pub id: GLuint, 

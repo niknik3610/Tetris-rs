@@ -1,13 +1,18 @@
+pub mod program;
+pub mod shader;
+pub mod gl_error;
+
+use program::Program;
+use crate::QUAD_SIZE;
+use crate::RESOLUTION;
+use gl_error::GLError;
+
 use std::ffi::CString;
 use sdl2::EventPump;
 use sdl2::Sdl;
 use sdl2::video::GLContext;
 use sdl2::video::Window;
-use crate::QUAD_SIZE;
-use crate::RESOLUTION;
-use crate::program::Program;
-use crate::shader;
-use crate::program;
+
 
 pub struct GLStructs {
     sdl: Sdl,
@@ -93,9 +98,9 @@ impl VideoBuffer {
     }
 }
 
-pub fn init_sdl() -> Result<GLStructs, String> {
-    let sdl = sdl2::init().expect("Failed to init SDL");    
-    let video_subsystem = sdl.video().expect("Failed to init video");
+pub fn init_sdl() -> Result<GLStructs, GLError> {
+    let sdl = sdl2::init().map_err(|_|GLError::SdlInit)?; 
+    let video_subsystem = sdl.video().map_err(|_| GLError::VideoInit)?;
     
     let gl_attr = video_subsystem.gl_attr();
     gl_attr.set_context_profile(sdl2::video::GLProfile::Core);
@@ -105,23 +110,23 @@ pub fn init_sdl() -> Result<GLStructs, String> {
         .window("Tetris", RESOLUTION.0, RESOLUTION.1)
         .opengl()
         .build()
-        .expect("Failed to start window");
-    
-    let gl_context = window.gl_create_context().expect("Failed to create Context");
+        .map_err(|_|GLError::WindowInit)?;    
+    let gl_context = window.gl_create_context().map_err(|_|GLError::ContextCreation)?;
     let _gl = gl::load_with (|f|
         video_subsystem.gl_get_proc_address(f) as *const std::os::raw::c_void
         ); 
+
     let vert_shader = shader::Shader::from_vert_source(
-        &CString::new(include_str!("triangle.vert")).unwrap()
-        ).unwrap();
+        &CString::new(include_str!("opengl_backend/triangle.vert")).unwrap()
+        ).map_err(|_|GLError::CompileShader)?;
 
     let frag_shader = shader::Shader::from_frag_source(
-        &CString::new(include_str!("triangle.frag")).unwrap()
-        ).unwrap();
+        &CString::new(include_str!("opengl_backend/triangle.frag")).unwrap()
+        ).map_err(|_|GLError::CompileShader)?;
 
     let shader_program = program::Program::from_shaders(
         &[vert_shader, frag_shader]
-        ).unwrap();
+        ).map_err(|_|GLError::CompileShader)?;
     unsafe { 
         gl::Viewport(
             0,
@@ -131,8 +136,7 @@ pub fn init_sdl() -> Result<GLStructs, String> {
             );
         gl::ClearColor(0.0, 0.0, 0.0, 1.0);    
     }
-    let event_pump = sdl.event_pump().expect("Failed to init event pump");
-
+    let event_pump = sdl.event_pump().map_err(|_| GLError::EventPumpInit)?;
     let to_return = GLStructs {
         sdl,
         shader_program,

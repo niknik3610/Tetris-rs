@@ -1,8 +1,8 @@
-mod shader;
-mod program;
 mod opengl_backend;
 mod pieces;
 mod input_handler;
+mod game_board;
+mod error_handler;
 
 use std::{ffi::{CStr, CString}, time::{Duration, Instant}};
 use gl::types::GLuint;
@@ -11,7 +11,7 @@ use sdl2::event::Event as SdlEvent;
 use std::thread::sleep;
 
 //TODO: Change this to change per level
-pub const TICK_RATE: Duration = Duration::from_millis(300);     
+pub const TICK_RATE: Duration = Duration::from_millis(8);     
 
 pub const RESOLUTION: (u32, u32) = (800, 800);
 pub const GRID_SIZE: (u32, u32) = (RESOLUTION.0/10, RESOLUTION.1/10);
@@ -35,13 +35,23 @@ fn main() {
     
     let bglen = video_buffer.bg_verts.len() / 6;
     let mut curr_piece = pieces::PIECES[0];
-    
+
+    let mut moves_per_second = 5;
+    let mut move_time = Duration::from_millis(1000/moves_per_second);
+
     let mut last_tick = Instant::now();
+    let mut last_move = Instant::now();
     'run_loop: loop { 
-        if Instant::now().duration_since(last_tick) > TICK_RATE {
+        //moves block according to move rate
+        if Instant::now().duration_since(last_move) > move_time{
             curr_piece.mv(pieces::Move::DOWN);
-            last_tick = Instant::now();
+            last_move = Instant::now();
         }
+
+        if TICK_RATE > Instant::now().duration_since(last_tick) {
+            sleep(TICK_RATE - Instant::now().duration_since(last_tick));
+        }
+        last_tick = Instant::now();
 
         video_buffer.clear_fg();
 
