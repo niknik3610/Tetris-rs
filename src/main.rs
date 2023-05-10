@@ -9,7 +9,8 @@ use gl::types::GLuint;
 use opengl_backend::VideoBuffer;
 use sdl2::event::Event as SdlEvent;
 use std::thread::sleep;
-use game_board::Board;
+use game_board::{Board, check_legal_move};
+use game_board::normalize_screen_pos;
 
 use crate::error_handler::Error;
 
@@ -55,14 +56,13 @@ fn main() {
             curr_piece.mv(pieces::Move::DOWN);
             if game_board.check_collisions(curr_piece) {
                 curr_piece.blocks.iter().for_each(|block|{
-                    let pos0 = (block.0 + curr_piece.coordinates.0 as f32) / QUAD_SIZE
-                        - BOARD_START[0] as f32; 
                     game_board.add_block(
-                        (
-                            pos0,
-                            (block.1 + curr_piece.coordinates.1) / QUAD_SIZE
-                        ),
-                        curr_piece.color).unwrap();
+                        normalize_screen_pos(
+                            (block.0 + curr_piece.coordinates.0,
+                             block.1 + curr_piece.coordinates.1
+                            )),
+                            curr_piece.color
+                            ).unwrap();
                 }
                 ); 
                 curr_piece = pieces::PIECES[0];
@@ -95,7 +95,9 @@ fn main() {
                 SdlEvent::Quit {..} => break 'run_loop,
                 SdlEvent::KeyDown { timestamp, window_id, keycode, ..} => {
                     if let Some(action) = input_handler::handle_key_event(keycode) {
-                        curr_piece.mv(action);
+                        if check_legal_move(curr_piece, action) {
+                            curr_piece.mv(action);
+                        }
                     }
                 }
                 _ => {}

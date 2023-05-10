@@ -13,6 +13,7 @@ pub const PIECES: [Piece; 1] = [
         )
 ];
 
+#[derive(Copy, Clone)]
 pub enum Move {
     LEFT,
     RIGHT,

@@ -1,4 +1,4 @@
-use crate::{error_handler::Error, opengl_backend::VideoBuffer, QUAD_SIZE, BOARD_START, pieces::Piece};
+use crate::{error_handler::Error, opengl_backend::VideoBuffer, QUAD_SIZE, BOARD_START, pieces::{Piece, Move}, BOARD_END, GRID_SIZE};
 
 #[derive(Copy, Clone)]
 pub struct Block {
@@ -41,9 +41,11 @@ impl Board {
     }
     pub fn check_collisions(&mut self, mut piece: Piece) -> bool {
         piece.blocks.iter_mut().for_each(|block|{
-            block.0 = (block.0 + piece.coordinates.0) / QUAD_SIZE - 
-                BOARD_START[0] as f32;
-            block.1 = (block.1 + piece.coordinates.1) / QUAD_SIZE;
+            *block = normalize_screen_pos(
+                (
+                    block.0 + piece.coordinates.0,
+                    block.1 + piece.coordinates.1
+                ));
         });
         
         for block in piece.blocks {
@@ -83,7 +85,7 @@ impl Board {
                 }
             })
         })
-    }
+    } 
 }
 
 impl Block {
@@ -91,3 +93,31 @@ impl Block {
         return Block { color }
     }
 }
+
+pub fn normalize_screen_pos(coords: (f32, f32)) -> (f32, f32) {
+    let coords0 = coords.0 / QUAD_SIZE - BOARD_START[0] as f32; 
+    let coords1 = coords.1 / QUAD_SIZE as f32;
+    return (coords0, coords1);
+}
+
+pub fn check_legal_move(mut piece: Piece, mv: Move) -> bool {
+    piece.mv(mv);
+    let normalized_coords_1 = normalize_screen_pos(
+        (
+            piece.coordinates.0 + piece.blocks[0].0,
+            0.0
+        )
+        );
+    let normalized_coords_2 =  normalize_screen_pos(
+        (
+            piece.coordinates.0 + piece.blocks[3].0,
+            0.0
+        )
+        );
+ 
+    if normalized_coords_1.0 < 0.0 ||
+        normalized_coords_2.0 >= 10.0 {
+            return false;
+        }
+    return true;
+    }
