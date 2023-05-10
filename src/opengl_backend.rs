@@ -72,7 +72,6 @@ impl VideoBuffer {
             coords.0 + size, coords.1, 0.0,         rgb.0, rgb.1, rgb.2, // bottom right
         ])
     }
-    ///Generally doesn't need to be used
     pub fn clear_fg(&mut self) {
         self.fg_verts = Vec::new();
     }

@@ -10,6 +10,8 @@ use opengl_backend::VideoBuffer;
 use sdl2::event::Event as SdlEvent;
 use std::thread::sleep;
 
+use crate::error_handler::Error;
+
 //TODO: Change this to change per level
 pub const TICK_RATE: Duration = Duration::from_millis(8);     
 
@@ -28,7 +30,14 @@ pub const GRID_END: [u32; 2] = [
 ];
 
 fn main() {
-    let mut gl_context = opengl_backend::init_sdl().unwrap();
+    let mut gl_context = match opengl_backend::init_sdl() {
+        Ok(r) => r,
+        Err(e) => {
+            println!("{}", e.to_string());
+            return;
+        }
+    };
+
     let mut video_buffer = VideoBuffer::new();
     draw_board(&mut video_buffer);
     println!("{}", GRID_START[0]);
