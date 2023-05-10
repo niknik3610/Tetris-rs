@@ -10,7 +10,7 @@ pub struct Block {
     color: (u8, u8, u8),
 }
 pub struct Board {
-    pub blocks: [[Option<Block>; 10]; 20],
+    pub blocks: [[Option<Block>; 20]; 10],
     pub highest_block: f32,
 }
 
@@ -30,7 +30,7 @@ impl Error for BoardError {
 impl Board {
     pub fn new() -> Board {
         return Board {
-            blocks: [[None; 10]; 20],
+            blocks: [[None; 20]; 10],
             highest_block: 0.0,
         };
     }
