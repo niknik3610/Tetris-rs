@@ -44,15 +44,30 @@ fn main() {
 
     let mut curr_piece = pieces::PIECES[0];
 
-    let mut moves_per_second = 5;
+    let mut moves_per_second = 7;
     let mut move_time = Duration::from_millis(1000/moves_per_second);
 
     let mut last_tick = Instant::now();
     let mut last_move = Instant::now();
     'run_loop: loop { 
-        //moves block according to move rate
+        //moves block according to move rate and checks for block rules
         if Instant::now().duration_since(last_move) > move_time{
             curr_piece.mv(pieces::Move::DOWN);
+            if game_board.check_collisions(curr_piece) {
+                curr_piece.blocks.iter().for_each(|block|{
+                    let pos0 = (block.0 + curr_piece.coordinates.0 as f32) / QUAD_SIZE
+                        - BOARD_START[0] as f32; 
+                    game_board.add_block(
+                        (
+                            pos0,
+                            (block.1 + curr_piece.coordinates.1) / QUAD_SIZE
+                        ),
+                        curr_piece.color).unwrap();
+                }
+                ); 
+                curr_piece = pieces::PIECES[0];
+            }
+
             last_move = Instant::now();
         }
 

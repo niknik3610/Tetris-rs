@@ -1,4 +1,4 @@
-use crate::{error_handler::Error, opengl_backend::VideoBuffer, QUAD_SIZE, BOARD_START};
+use crate::{error_handler::Error, opengl_backend::VideoBuffer, QUAD_SIZE, BOARD_START, pieces::Piece};
 
 #[derive(Copy, Clone)]
 pub struct Block {
@@ -6,6 +6,7 @@ pub struct Block {
 }
 pub struct Board {
     pub blocks: [[Option<Block>; 10]; 20],
+    pub highest_block: f32
 }
 
 #[derive(Debug)]
@@ -23,20 +24,43 @@ impl Error for BoardError {
 
 impl Board {
     pub fn new() -> Board {
-        return Board {blocks: [[None; 10]; 20]} 
+        return Board {blocks: [[None; 10]; 20], highest_block: 0.0} 
     }
     pub fn add_block(
         &mut self,
         pos: (f32, f32),
         color: (u8, u8, u8)
         ) -> Result<(), BoardError> {
-        if let None = self.blocks[pos.0 as usize][pos.1 as usize] {
-            self.blocks[pos.0 as usize][pos.1 as usize] = Some(Block::new(color));
-            return Ok(())
-        }
-        return Err(BoardError::AlreadyTaken)
+        // if let None = self.blocks[pos.0 as usize][pos.1 as usize] {
+        //     println!("{}, {}", pos.0, pos.1);
+        //     return Ok(())
+        // }
+        // return Err(BoardError::AlreadyTaken)
+        self.blocks[pos.0 as usize][pos.1 as usize] = Some(Block::new(color));
+        return Ok(());
     }
-    pub fn check_block(
+    pub fn check_collisions(&mut self, mut piece: Piece) -> bool {
+        piece.blocks.iter_mut().for_each(|block|{
+            block.0 = (block.0 + piece.coordinates.0) / QUAD_SIZE - 
+                BOARD_START[0] as f32;
+            block.1 = (block.1 + piece.coordinates.1) / QUAD_SIZE;
+        });
+        
+        for block in piece.blocks {
+            if block.1 - 1.0 > self.highest_block {
+                continue;
+            }
+            if self.check_block((block.0, block.1 - 1.0)) {
+                self.highest_block += 1.0;
+                return true;
+            }
+            else if block.1 == 0.0 {
+                return true
+            }
+        }
+        return false;
+    }
+    fn check_block(
         &self,
         pos: (f32, f32),
         ) -> bool {
