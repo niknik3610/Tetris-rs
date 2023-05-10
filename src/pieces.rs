@@ -1,4 +1,4 @@
-use crate::{GRID_START, QUAD_SIZE};
+use crate::{BOARD_START, QUAD_SIZE};
 
 pub const PIECES: [Piece; 1] = [
     Piece::new(
@@ -8,7 +8,7 @@ pub const PIECES: [Piece; 1] = [
         (2.0 * QUAD_SIZE, 0.0), 
         (3.0 * QUAD_SIZE, 0.0)
         ],
-        ((GRID_START[0] as f32 + 3.0) * QUAD_SIZE, 20.0 * QUAD_SIZE),
+        ((BOARD_START[0] as f32 + 3.0) * QUAD_SIZE, 20.0 * QUAD_SIZE),
         (10, 220, 240)
         )
 ];

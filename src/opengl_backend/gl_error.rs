@@ -1,5 +1,6 @@
 use crate::error_handler::Error;
 
+#[derive(Debug)]
 pub enum GLError {
     SdlInit,
     VideoInit,
