@@ -41,7 +41,7 @@ pub const PIECES: [Piece; 7] = [
         ],
         ((BOARD_START[0] as f32 + 3.0) * QUAD_SIZE, 20.0 * QUAD_SIZE),
         (250, 150, 30),
-    ), 
+    ),
     Piece::new(
         [
             (0.0 * QUAD_SIZE, 0.0 * QUAD_SIZE),

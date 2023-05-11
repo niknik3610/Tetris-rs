@@ -8,8 +8,8 @@ use game_board::normalize_screen_pos;
 use game_board::{check_legal_move, Board};
 use gl::types::GLuint;
 use opengl_backend::VideoBuffer;
-use sdl2::event::Event as SdlEvent;
 use rand::prelude::*;
+use sdl2::event::Event as SdlEvent;
 use std::thread::sleep;
 use std::{
     ffi::{CStr, CString},
@@ -38,10 +38,10 @@ fn main() {
     let bglen = video_buffer.bg_verts.len() / 6;
 
     let mut game_board = Board::new();
-    
+
     let mut piece_order: Vec<usize> = (0..=6).collect();
     piece_order.clone().shuffle(&mut rng);
-    
+
     let mut curr_piece = pieces::PIECES[piece_order.pop().unwrap()];
 
     let mut moves_per_second = 7;
@@ -67,7 +67,7 @@ fn main() {
                 });
                 let next_piece = match piece_order.pop() {
                     Some(r) => r,
-                    None => reshuffle_pieces(&mut piece_order, &mut rng)
+                    None => reshuffle_pieces(&mut piece_order, &mut rng),
                 };
                 curr_piece = pieces::PIECES[next_piece];
             }
