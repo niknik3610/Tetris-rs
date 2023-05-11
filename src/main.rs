@@ -8,7 +8,9 @@ use game_board::normalize_screen_pos;
 use game_board::{check_legal_move, Board};
 use gl::types::GLuint;
 use opengl_backend::VideoBuffer;
-use rand::prelude::*;
+use rand::Rng;
+use rand::rngs::ThreadRng;
+use rand::seq::SliceRandom;
 use sdl2::event::Event as SdlEvent;
 use std::thread::sleep;
 use std::{
@@ -33,14 +35,15 @@ fn main() {
     let mut gl_context = opengl_backend::init_sdl().unwrap();
     let mut video_buffer = VideoBuffer::new();
     let mut rng = rand::thread_rng();
+    let piece_order_template: Vec<usize> = (0..=6).collect();
+    let mut piece_order = vec![];
+    reshuffle_pieces(&mut piece_order, &piece_order_template, &mut rng); 
 
     draw_background(&mut video_buffer);
     let bglen = video_buffer.bg_verts.len() / 6;
 
     let mut game_board = Board::new();
 
-    let mut piece_order: Vec<usize> = (0..=6).collect();
-    piece_order.clone().shuffle(&mut rng);
 
     let mut curr_piece = pieces::PIECES[piece_order.pop().unwrap()];
 
@@ -67,7 +70,7 @@ fn main() {
                 });
                 let next_piece = match piece_order.pop() {
                     Some(r) => r,
-                    None => reshuffle_pieces(&mut piece_order, &mut rng),
+                    None => reshuffle_pieces(&mut piece_order, &piece_order_template, &mut rng),
                 };
                 curr_piece = pieces::PIECES[next_piece];
             }
@@ -144,7 +147,11 @@ fn draw_background(video_buffer: &mut VideoBuffer) {
     }
 }
 
-fn reshuffle_pieces(piece_order: &mut Vec<usize>, rng: &mut ThreadRng) -> usize {
+fn reshuffle_pieces(
+    piece_order: &mut Vec<usize>,
+    template: &Vec<usize>,
+    rng: &mut ThreadRng
+    ) -> usize {
     *piece_order = (0..=6).collect();
     piece_order.shuffle(&mut *rng);
     return piece_order.pop().unwrap();

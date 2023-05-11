@@ -1,7 +1,7 @@
 use crate::{BOARD_START, QUAD_SIZE};
 
 pub const PIECES: [Piece; 7] = [
-    Piece::new(
+    Piece::new(     //I
         [
             //Blocks
             (0.0 * QUAD_SIZE, 0.0 * QUAD_SIZE),
@@ -12,7 +12,7 @@ pub const PIECES: [Piece; 7] = [
         ((BOARD_START[0] as f32 + 3.0) * QUAD_SIZE, 20.0 * QUAD_SIZE), //Coords
         (10, 220, 240),                                                //Color
     ),
-    Piece::new(
+    Piece::new(     //T
         [
             (0.0 * QUAD_SIZE, 0.0 * QUAD_SIZE),
             (1.0 * QUAD_SIZE, 0.0 * QUAD_SIZE),
@@ -20,9 +20,9 @@ pub const PIECES: [Piece; 7] = [
             (2.0 * QUAD_SIZE, 0.0 * QUAD_SIZE),
         ],
         ((BOARD_START[0] as f32 + 3.0) * QUAD_SIZE, 20.0 * QUAD_SIZE),
-        (180, 55, 190),
+        (220, 80, 200),
     ),
-    Piece::new(
+    Piece::new(     //L Left Side
         [
             (0.0 * QUAD_SIZE, 0.0 * QUAD_SIZE),
             (0.0 * QUAD_SIZE, 1.0 * QUAD_SIZE),
@@ -30,9 +30,9 @@ pub const PIECES: [Piece; 7] = [
             (2.0 * QUAD_SIZE, 0.0 * QUAD_SIZE),
         ],
         ((BOARD_START[0] as f32 + 3.0) * QUAD_SIZE, 20.0 * QUAD_SIZE),
-        (0, 0, 180),
+        (0, 0, 240),
     ),
-    Piece::new(
+    Piece::new(     //L Right Side
         [
             (0.0 * QUAD_SIZE, 0.0 * QUAD_SIZE),
             (1.0 * QUAD_SIZE, 0.0 * QUAD_SIZE),
@@ -42,7 +42,7 @@ pub const PIECES: [Piece; 7] = [
         ((BOARD_START[0] as f32 + 3.0) * QUAD_SIZE, 20.0 * QUAD_SIZE),
         (250, 150, 30),
     ),
-    Piece::new(
+    Piece::new(     //O
         [
             (0.0 * QUAD_SIZE, 0.0 * QUAD_SIZE),
             (0.0 * QUAD_SIZE, 1.0 * QUAD_SIZE),
@@ -52,7 +52,7 @@ pub const PIECES: [Piece; 7] = [
         ((BOARD_START[0] as f32 + 3.0) * QUAD_SIZE, 20.0 * QUAD_SIZE),
         (255, 230, 30),
     ),
-    Piece::new(
+    Piece::new(     //Z right side
         [
             (0.0 * QUAD_SIZE, 0.0 * QUAD_SIZE),
             (1.0 * QUAD_SIZE, 0.0 * QUAD_SIZE),
@@ -60,9 +60,9 @@ pub const PIECES: [Piece; 7] = [
             (2.0 * QUAD_SIZE, 1.0 * QUAD_SIZE),
         ],
         ((BOARD_START[0] as f32 + 3.0) * QUAD_SIZE, 20.0 * QUAD_SIZE),
-        (30, 250, 30),
+        (30, 215, 30),
     ),
-    Piece::new(
+    Piece::new(     //Z left side
         [
             (0.0 * QUAD_SIZE, 1.0 * QUAD_SIZE),
             (1.0 * QUAD_SIZE, 1.0 * QUAD_SIZE),
@@ -70,7 +70,7 @@ pub const PIECES: [Piece; 7] = [
             (2.0 * QUAD_SIZE, 0.0 * QUAD_SIZE),
         ],
         ((BOARD_START[0] as f32 + 3.0) * QUAD_SIZE, 20.0 * QUAD_SIZE),
-        (240, 0, 30),
+        (215, 0, 30),
     ),
 ];
 

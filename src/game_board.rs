@@ -2,7 +2,7 @@ use crate::{
     error_handler::Error,
     opengl_backend::VideoBuffer,
     pieces::{Move, Piece},
-    BOARD_END, BOARD_START, GRID_SIZE, QUAD_SIZE,
+    BOARD_START, QUAD_SIZE,
 };
 
 #[derive(Copy, Clone)]
@@ -11,7 +11,6 @@ pub struct Block {
 }
 pub struct Board {
     pub blocks: [[Option<Block>; 20]; 10],
-    pub highest_block: f32,
 }
 
 #[derive(Debug)]
@@ -31,7 +30,6 @@ impl Board {
     pub fn new() -> Board {
         return Board {
             blocks: [[None; 20]; 10],
-            highest_block: 0.0,
         };
     }
     pub fn add_block(&mut self, pos: (f32, f32), color: (u8, u8, u8)) -> Result<(), BoardError> {
@@ -53,12 +51,8 @@ impl Board {
             ));
         });
 
-        for block in piece.blocks {
-            if block.1 - 1.0 > self.highest_block {
-                continue;
-            }
+        for block in piece.blocks { 
             if self.check_block((block.0, block.1 - 1.0)) {
-                self.highest_block += 1.0;
                 return true;
             } else if block.1 == 0.0 {
                 return true;
