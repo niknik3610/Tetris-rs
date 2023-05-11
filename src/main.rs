@@ -9,6 +9,7 @@ use game_board::{check_legal_move, Board};
 use gl::types::GLuint;
 use opengl_backend::VideoBuffer;
 use sdl2::event::Event as SdlEvent;
+use rand::prelude::*;
 use std::thread::sleep;
 use std::{
     ffi::{CStr, CString},
@@ -30,17 +31,18 @@ pub const BOARD_END: [u32; 2] = [GRID_SIZE.0 / (SIZE_MULTIPLIER * 2) + 5, 20];
 
 fn main() {
     let mut gl_context = opengl_backend::init_sdl().unwrap();
-
     let mut video_buffer = VideoBuffer::new();
+    let mut rng = rand::thread_rng();
 
     draw_background(&mut video_buffer);
     let bglen = video_buffer.bg_verts.len() / 6;
 
     let mut game_board = Board::new();
-    game_board.add_block((0.0, 0.0), (255, 255, 255)).unwrap();
-    game_board.add_block((1.0, 0.0), (255, 255, 255)).unwrap();
-
-    let mut curr_piece = pieces::PIECES[3];
+    
+    let mut piece_order: Vec<usize> = (0..=6).collect();
+    piece_order.clone().shuffle(&mut rng);
+    
+    let mut curr_piece = pieces::PIECES[piece_order.pop().unwrap()];
 
     let mut moves_per_second = 7;
     let mut move_time = Duration::from_millis(1000 / moves_per_second);
@@ -63,7 +65,11 @@ fn main() {
                         )
                         .unwrap();
                 });
-                curr_piece = pieces::PIECES[0];
+                let next_piece = match piece_order.pop() {
+                    Some(r) => r,
+                    None => reshuffle_pieces(&mut piece_order, &mut rng)
+                };
+                curr_piece = pieces::PIECES[next_piece];
             }
 
             last_move = Instant::now();
@@ -136,4 +142,10 @@ fn draw_background(video_buffer: &mut VideoBuffer) {
             current_color_bool = !current_color_bool;
         }
     }
+}
+
+fn reshuffle_pieces(piece_order: &mut Vec<usize>, rng: &mut ThreadRng) -> usize {
+    *piece_order = (0..=6).collect();
+    piece_order.shuffle(&mut *rng);
+    return piece_order.pop().unwrap();
 }
