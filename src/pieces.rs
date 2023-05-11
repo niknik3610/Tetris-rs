@@ -1,15 +1,39 @@
 use crate::{BOARD_START, QUAD_SIZE};
 
-pub const PIECES: [Piece; 1] = [Piece::new(
-    [
-        (0.0 * QUAD_SIZE, 0.0),
-        (1.0 * QUAD_SIZE, 0.0),
-        (2.0 * QUAD_SIZE, 0.0),
-        (3.0 * QUAD_SIZE, 0.0),
-    ],
-    ((BOARD_START[0] as f32 + 3.0) * QUAD_SIZE, 20.0 * QUAD_SIZE),
-    (10, 220, 240),
-)];
+pub const PIECES: [Piece; 3] = [
+    Piece::new(
+        [   //Blocks
+        (0.0 * QUAD_SIZE, 0.0 * QUAD_SIZE),
+        (1.0 * QUAD_SIZE, 0.0 * QUAD_SIZE),
+        (2.0 * QUAD_SIZE, 0.0 * QUAD_SIZE),
+        (3.0 * QUAD_SIZE, 0.0 * QUAD_SIZE),
+        ],
+        ((BOARD_START[0] as f32 + 3.0) * QUAD_SIZE, 20.0 * QUAD_SIZE), //Coords
+        (10, 220, 240),     //Color
+        ), 
+    Piece::new(
+        [
+        (0.0 * QUAD_SIZE, 0.0 * QUAD_SIZE),
+        (1.0 * QUAD_SIZE, 0.0 * QUAD_SIZE),
+        (1.0 * QUAD_SIZE, 1.0 * QUAD_SIZE),
+        (2.0 * QUAD_SIZE, 0.0 * QUAD_SIZE),
+        ],          
+        ((BOARD_START[0] as f32 + 3.0) * QUAD_SIZE, 20.0 * QUAD_SIZE),
+        (180, 55, 190)
+        ),
+    Piece::new(
+            [
+            (0.0 * QUAD_SIZE, 0.0 * QUAD_SIZE),
+            (0.0 * QUAD_SIZE, 1.0 * QUAD_SIZE),
+            (1.0 * QUAD_SIZE, 0.0 * QUAD_SIZE),
+            (2.0 * QUAD_SIZE, 0.0 * QUAD_SIZE),
+            ],          
+            ((BOARD_START[0] as f32 + 3.0) * QUAD_SIZE, 20.0 * QUAD_SIZE),
+            (0, 0, 180)
+            ),
+
+
+        ];
 
 #[derive(Copy, Clone)]
 pub enum Move {
