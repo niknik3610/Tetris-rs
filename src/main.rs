@@ -40,7 +40,7 @@ fn main() {
     game_board.add_block((0.0, 0.0), (255, 255, 255)).unwrap();
     game_board.add_block((1.0, 0.0), (255, 255, 255)).unwrap();
 
-    let mut curr_piece = pieces::PIECES[2];
+    let mut curr_piece = pieces::PIECES[3];
 
     let mut moves_per_second = 7;
     let mut move_time = Duration::from_millis(1000 / moves_per_second);
