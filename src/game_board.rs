@@ -33,8 +33,6 @@ impl Board {
         };
     }
     pub fn add_block(&mut self, pos: (f32, f32), color: (u8, u8, u8)) -> Result<(), BoardError> {
-        //Error Handling (Yuck)
-
         // if let None = self.blocks[pos.0 as usize][pos.1 as usize] {
         //     println!("{}, {}", pos.0, pos.1);
         //     return Ok(())
